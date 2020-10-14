@@ -51,7 +51,7 @@
             <div v-if="step == 1">
                 <h2>Bestätigung</h2>
 
-                <span>Zahlungsmethode {{paymentMethod==2?'SEPA-Monatsrechnung':'Kreditkarte'}}</span>
+                <span v-if="workshopMetadata.price != 0">Zahlungsmethode {{paymentMethod==2?'SEPA-Monatsrechnung':'Kreditkarte'}}</span>
 
                 <div class="spacer"></div>
 
@@ -85,7 +85,8 @@ import WorkshopPreview from "../../components/WorkshopPreview";
                 paymentMethod: 0,
                 step: 0,
                 workshopDate: null,
-                userMetadata: null
+                userMetadata: null,
+                workshopMetadata: null
             }
         },
         mounted() {
@@ -95,6 +96,15 @@ import WorkshopPreview from "../../components/WorkshopPreview";
             this.$store.dispatch("getUserMetadata").then(data =>{
                 this.userMetadata = data.data;
             })
+          let body = {
+            "workshop_date_uuids": [this.$route.query['uuid']],
+          }
+          this.$store.dispatch("getWorkshopDateMetadata", body).then((data) => {
+            this.workshopMetadata = data[this.$route.query['uuid']];
+            if(this.workshopMetadata.price == 0){
+              this.step = 1;
+            }
+          })
         },
         methods: {
 
